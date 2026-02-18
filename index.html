@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Culinary Atlas | Explore World Recipes</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-fullscreen/1.0.2/leaflet.fullscreen.css" />
     <style>
         :root {
             --bg-primary: #0a0a0a;
             --bg-secondary: #141414;
             --bg-tertiary: #1f1f1f;
             --border: #2a2a2a;
-            --accent: #2DD512;
-            --accent-dim: rgba(45, 213, 18, 0.1);
+            --accent: #4285F4;
+            --accent-hover: #5294FF;
             --text-primary: #ffffff;
             --text-secondary: #a0a0a0;
-            --text-tertiary: #666666;
         }
 
         * {
@@ -37,83 +37,110 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 70px;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(20px);
+            height: 60px;
+            background: var(--bg-secondary);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 30px;
+            padding: 0 16px;
             z-index: 1000;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: var(--accent);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
         }
 
         .logo-text {
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-size: 18px;
+            font-weight: 600;
         }
 
-        .logo-text span {
-            color: var(--accent);
+        .search-box {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 20px;
+            position: relative;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 30px;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 24px;
             color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
         }
 
-        /* Main Layout */
-        .container {
-            display: flex;
-            height: 100vh;
-            padding-top: 70px;
+        .search-box input:focus {
+            border-color: var(--accent);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
         }
 
         /* Map Container */
         #map {
-            flex: 1;
-            height: calc(100vh - 70px);
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        /* Zoom Level Indicator */
+        .zoom-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
             background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            z-index: 1000;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .zoom-indicator .level {
+            color: var(--accent);
+            font-weight: 600;
         }
 
         /* Side Panel */
         .side-panel {
-            width: 450px;
+            position: fixed;
+            top: 60px;
+            right: 0;
+            width: 400px;
+            bottom: 0;
             background: var(--bg-secondary);
             border-left: 1px solid var(--border);
-            overflow-y: auto;
             transform: translateX(100%);
             transition: transform 0.3s ease;
+            z-index: 1001;
+            overflow-y: auto;
         }
 
         .side-panel.active {
@@ -121,62 +148,60 @@
         }
 
         .panel-header {
-            padding: 30px;
+            padding: 20px;
             border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             background: var(--bg-secondary);
+            z-index: 10;
         }
 
         .close-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 36px;
-            height: 36px;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 6px;
             color: var(--text-secondary);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            transition: all 0.2s;
+            font-size: 16px;
         }
 
-        .close-btn:hover {
-            background: var(--border);
-            color: var(--text-primary);
-        }
-
-        .country-flag {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-
-        .country-name {
-            font-size: 28px;
-            font-weight: 700;
+        .breadcrumb {
+            font-size: 12px;
+            color: var(--accent);
             margin-bottom: 8px;
         }
 
-        .country-meta {
-            color: var(--text-secondary);
-            font-size: 14px;
+        .location-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
         }
 
-        .recipe-count {
-            color: var(--accent);
-            font-weight: 600;
+        .location-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
         }
 
         /* Recipe Grid */
-        .recipes-grid {
-            padding: 20px;
-            display: grid;
-            gap: 16px;
+        .recipes-container {
+            padding: 16px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
         }
 
         .recipe-card {
@@ -184,6 +209,7 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
+            margin-bottom: 12px;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -195,7 +221,7 @@
 
         .recipe-image {
             width: 100%;
-            height: 160px;
+            height: 140px;
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
             display: flex;
             align-items: center;
@@ -204,151 +230,147 @@
         }
 
         .recipe-content {
-            padding: 16px;
+            padding: 14px;
         }
 
         .recipe-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-primary);
+            margin-bottom: 6px;
         }
 
         .recipe-desc {
             font-size: 13px;
             color: var(--text-secondary);
-            line-height: 1.5;
-            margin-bottom: 12px;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .recipe-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
         }
 
         .recipe-link {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             color: var(--accent);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             text-decoration: none;
+            margin-top: 8px;
         }
 
-        .recipe-link:hover {
-            text-decoration: underline;
+        /* Region List (for zoomed in view) */
+        .region-list {
+            padding: 16px;
         }
 
-        /* Empty State */
-        .empty-state {
+        .region-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .region-item:hover {
+            border-color: var(--accent);
+        }
+
+        .region-flag {
+            font-size: 24px;
+        }
+
+        .region-info {
+            flex: 1;
+        }
+
+        .region-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .region-count {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100%;
-            padding: 40px;
-            text-align: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
         }
 
-        .empty-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .empty-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .empty-text {
-            color: var(--text-secondary);
-            font-size: 14px;
-            max-width: 300px;
-        }
-
-        /* Welcome Overlay */
-        .welcome-overlay {
-            position: fixed;
-            top: 70px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-            transition: opacity 0.3s;
-        }
-
-        .welcome-overlay.hidden {
+        .loading-overlay.hidden {
             opacity: 0;
             pointer-events: none;
         }
 
-        .welcome-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 40px;
-            max-width: 500px;
-            text-align: center;
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .welcome-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
-        .welcome-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .welcome-text {
+        .loading-text {
+            margin-top: 16px;
             color: var(--text-secondary);
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 24px;
+            font-size: 14px;
         }
 
-        .welcome-btn {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 14px 32px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.2s;
+        /* Map Controls */
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
         }
 
-        .welcome-btn:hover {
-            transform: scale(1.05);
+        .leaflet-control-zoom a {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border) !important;
+            width: 36px !important;
+            height: 36px !important;
+            line-height: 36px !important;
+            font-size: 18px !important;
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .side-panel {
-                position: fixed;
-                top: 70px;
-                right: 0;
-                bottom: 0;
-                width: 100%;
-                z-index: 100;
-            }
-            
-            .nav-links {
-                display: none;
-            }
+        .leaflet-control-zoom a:hover {
+            background: var(--bg-tertiary) !important;
         }
 
-        /* Map Popup Customization */
+        /* Popup Styling */
         .leaflet-popup-content-wrapper {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 12px;
             color: var(--text-primary);
+            padding: 4px;
         }
 
         .leaflet-popup-tip {
@@ -356,85 +378,119 @@
             border: 1px solid var(--border);
         }
 
-        .leaflet-container a.leaflet-popup-close-button {
-            color: var(--text-secondary);
-        }
-
-        .popup-country {
+        .popup-title {
             font-size: 16px;
             font-weight: 700;
             margin-bottom: 4px;
         }
 
-        .popup-text {
+        .popup-subtitle {
             font-size: 13px;
             color: var(--text-secondary);
         }
 
-        .popup-click {
-            font-size: 12px;
+        .popup-hint {
+            font-size: 11px;
             color: var(--accent);
             margin-top: 8px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .side-panel {
+                width: 100%;
+            }
+            
+            .search-box {
+                display: none;
+            }
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Culinary Atlas...</div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="logo">
             <div class="logo-icon">🌍</div>
-            <div class="logo-text">Culinary<span>Atlas</span></div>
+            <div class="logo-text">Culinary Atlas</div>
         </div>
-        <nav class="nav-links">
-            <a href="#map">Explore Map</a>
-            <a href="#about">About</a>
-        </nav>
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search countries, regions, or recipes..." id="searchInput">
+        </div>
     </header>
 
-    <!-- Welcome Overlay -->
-    <div class="welcome-overlay" id="welcomeOverlay">
-        <div class="welcome-card">
-            <div class="welcome-icon">🗺️</div>
-            <h1 class="welcome-title">Welcome to Culinary Atlas</h1>
-            <p class="welcome-text">
-                Explore the world's most delicious recipes by clicking on any country. 
-                Discover authentic dishes from Italy to Japan, Mexico to India.
-            </p>
-            <button class="welcome-btn" onclick="dismissWelcome()">Start Exploring</button>
+    <!-- Map -->
+    <div id="map"></div>
+
+    <!-- Zoom Level Indicator -->
+    <div class="zoom-indicator">
+        Zoom: <span class="level" id="zoomLevel">World View</span>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-value" id="totalCountries">15</div>
+            <div class="stat-label">Countries</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="totalRecipes">75+</div>
+            <div class="stat-label">Recipes</div>
         </div>
     </div>
 
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Map -->
-        <div id="map"></div>
-
-        <!-- Side Panel -->
-        <div class="side-panel" id="sidePanel">
-            <div class="empty-state" id="emptyState">
-                <div class="empty-icon">👆</div>
-                <h2 class="empty-title">Select a Country</h2>
-                <p class="empty-text">Click on any country on the map to discover its most popular recipes</p>
-            </div>
-            
-            <div id="countryContent" style="display: none;">
-                <div class="panel-header">
-                    <button class="close-btn" onclick="closePanel()">✕</button>
-                    <div class="country-flag" id="countryFlag">🇮🇹</div>
-                    <h2 class="country-name" id="countryName">Italy</h2>
-                    <div class="country-meta">
-                        <span class="recipe-count" id="recipeCount">5 recipes</span> • 
-                        <span id="cuisineType">Mediterranean Cuisine</span>
-                    </div>
-                </div>
-                <div class="recipes-grid" id="recipesGrid">
-                    <!-- Recipes will be inserted here -->
-                </div>
-            </div>
+    <!-- Side Panel -->
+    <div class="side-panel" id="sidePanel">
+        <div class="panel-header">
+            <button class="close-btn" onclick="closePanel()">✕</button>
+            <div class="breadcrumb" id="breadcrumb">World</div>
+            <h2 class="location-title" id="locationTitle">Select a Location</h2>
+            <p class="location-subtitle" id="locationSubtitle">Explore recipes from around the world</p>
+        </div>
+        <div id="panelContent">
+            <!-- Dynamic content here -->
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-fullscreen/1.0.2/Leaflet.fullscreen.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

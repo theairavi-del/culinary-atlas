@@ -1,598 +1,278 @@
-// Culinary Atlas - Recipe Data
-const countryRecipes = {
-    italy: {
-        name: "Italy",
-        flag: "🇮🇹",
-        cuisine: "Mediterranean Cuisine",
-        recipes: [
-            {
-                name: "Pizza Margherita",
-                description: "Classic Neapolitan pizza with fresh mozzarella, tomatoes, and basil",
-                emoji: "🍕",
-                link: "https://www.allrecipes.com/recipe/20171/quick-and-easy-pizza-crust/"
-            },
-            {
-                name: "Pasta Carbonara",
-                description: "Creamy pasta with eggs, Pecorino Romano, guanciale, and black pepper",
-                emoji: "🍝",
-                link: "https://www.allrecipes.com/recipe/11973/spaghetti-carbonara-ii/"
-            },
-            {
-                name: "Tiramisu",
-                description: "Coffee-flavored Italian dessert with layers of mascarpone and ladyfingers",
-                emoji: "🍰",
-                link: "https://www.allrecipes.com/recipe/21412/tiramisu-ii/"
-            },
-            {
-                name: "Risotto alla Milanese",
-                description: "Creamy saffron risotto from Milan with butter and Parmesan",
-                emoji: "🍚",
-                link: "https://www.allrecipes.com/recipe/85389/risotto-alla-milanese/"
-            },
-            {
-                name: "Osso Buco",
-                description: "Braised veal shanks in white wine and broth, served with gremolata",
-                emoji: "🍖",
-                link: "https://www.allrecipes.com/recipe/14685/osso-buco/"
-            }
-        ],
-        coords: [42.5, 12.5]
+// Culinary Atlas - Google Maps Style with Regional Zoom
+const mapData = {
+    // Countries (Zoom 0-3)
+    countries: {
+        italy: {
+            name: "Italy",
+            flag: "🇮🇹",
+            coords: [42.5, 12.5],
+            bounds: [[47.1, 6.6], [35.5, 18.5]],
+            hasRegions: true,
+            zoomThreshold: 5
+        },
+        mexico: {
+            name: "Mexico",
+            flag: "🇲🇽",
+            coords: [23.5, -102.5],
+            bounds: [[32.7, -117.0], [14.5, -86.7]],
+            hasRegions: true,
+            zoomThreshold: 5
+        },
+        japan: {
+            name: "Japan",
+            flag: "🇯🇵",
+            coords: [36.5, 138.0],
+            hasRegions: true,
+            zoomThreshold: 5
+        },
+        india: {
+            name: "India",
+            flag: "🇮🇳",
+            coords: [22.5, 79.0],
+            bounds: [[35.5, 68.1], [6.7, 97.4]],
+            hasRegions: true,
+            zoomThreshold: 5
+        },
+        france: {
+            name: "France",
+            flag: "🇫🇷",
+            coords: [46.5, 2.2],
+            hasRegions: true,
+            zoomThreshold: 5
+        },
+        thailand: {
+            name: "Thailand",
+            flag: "🇹🇭",
+            coords: [15.0, 100.5],
+            hasRegions: true,
+            zoomThreshold: 5
+        },
+        usa: {
+            name: "United States",
+            flag: "🇺🇸",
+            coords: [39.8, -98.5],
+            bounds: [[49.4, -125.0], [24.5, -66.9]],
+            hasRegions: true,
+            zoomThreshold: 4
+        },
+        china: {
+            name: "China",
+            flag: "🇨🇳",
+            coords: [35.0, 104.0],
+            hasRegions: true,
+            zoomThreshold: 4
+        },
+        greece: {
+            name: "Greece",
+            flag: "🇬🇷",
+            coords: [39.0, 22.0],
+            hasRegions: false
+        },
+        spain: {
+            name: "Spain",
+            flag: "🇪🇸",
+            coords: [40.0, -4.0],
+            hasRegions: true,
+            zoomThreshold: 5
+        },
+        brazil: {
+            name: "Brazil",
+            flag: "🇧🇷",
+            coords: [-14.2, -51.9],
+            hasRegions: true,
+            zoomThreshold: 4
+        },
+        vietnam: {
+            name: "Vietnam",
+            flag: "🇻🇳",
+            coords: [14.0, 108.3],
+            hasRegions: true,
+            zoomThreshold: 5
+        },
+        morocco: {
+            name: "Morocco",
+            flag: "🇲🇦",
+            coords: [31.8, -7.1],
+            hasRegions: false
+        },
+        lebanon: {
+            name: "Lebanon",
+            flag: "🇱🇧",
+            coords: [33.9, 35.9],
+            hasRegions: false
+        },
+        korea: {
+            name: "South Korea",
+            flag: "🇰🇷",
+            coords: [36.5, 127.9],
+            hasRegions: true,
+            zoomThreshold: 6
+        }
     },
-    mexico: {
-        name: "Mexico",
-        flag: "🇲🇽",
-        cuisine: "Mexican Cuisine",
-        recipes: [
-            {
-                name: "Tacos al Pastor",
-                description: "Spit-grilled pork tacos with pineapple, onions, and cilantro",
-                emoji: "🌮",
-                link: "https://www.allrecipes.com/recipe/257067/tacos-al-pastor/"
+
+    // Regions/States (Zoom 4+)
+    regions: {
+        // USA States
+        usa: {
+            california: {
+                name: "California",
+                coords: [36.7, -119.4],
+                recipes: ["Fish Tacos", "In-N-Out Burger", "Avocado Toast", "Cioppino", "California Roll"]
             },
-            {
-                name: "Guacamole",
-                description: "Fresh avocado dip with lime, cilantro, onions, and jalapeño",
-                emoji: "🥑",
-                link: "https://www.allrecipes.com/recipe/14231/guacamole/"
+            texas: {
+                name: "Texas",
+                coords: [31.0, -99.9],
+                recipes: ["Brisket BBQ", "Chili", "Breakfast Tacos", "Kolaches", "Chicken Fried Steak"]
             },
-            {
-                name: "Enchiladas",
-                description: "Corn tortillas filled with meat, covered in chili sauce and cheese",
-                emoji: "🌯",
-                link: "https://www.allrecipes.com/recipe/83557/chicken-enchiladas-ii/"
+            newyork: {
+                name: "New York",
+                coords: [43.0, -75.5],
+                recipes: ["NY Pizza", "Bagels with Lox", "Buffalo Wings", "Cheesecake", "Pastrami Sandwich"]
             },
-            {
-                name: "Chiles en Nogada",
-                description: "Stuffed poblano peppers with walnut sauce and pomegranate",
-                emoji: "🌶️",
-                link: "https://www.allrecipes.com/recipe/213658/chiles-en-nogada/"
-            },
-            {
-                name: "Tamales",
-                description: "Steamed corn dough with savory or sweet fillings in corn husks",
-                emoji: "🫔",
-                link: "https://www.allrecipes.com/recipe/21668/real-homemade-tamales/"
+            louisiana: {
+                name: "Louisiana",
+                coords: [30.9, -91.9],
+                recipes: ["Gumbo", "Jambalaya", "Beignets", "Po' Boy", "Crawfish Étouffée"]
             }
-        ],
-        coords: [23.5, -102.5]
+        },
+        
+        // India States
+        india: {
+            punjab: {
+                name: "Punjab",
+                coords: [31.1, 75.3],
+                recipes: ["Butter Chicken", "Sarson ka Saag", "Lassi", "Paratha", "Amritsari Kulcha"]
+            },
+            kerala: {
+                name: "Kerala",
+                coords: [10.8, 76.9],
+                recipes: ["Fish Curry", "Appam", "Puttu", "Sadya", "Kerala Parotta"]
+            },
+            maharashtra: {
+                name: "Maharashtra",
+                coords: [19.7, 75.9],
+                recipes: ["Vada Pav", "Pav Bhaji", "Misal Pav", "Puran Poli", "Mumbai Bhel"]
+            },
+            bengal: {
+                name: "West Bengal",
+                coords: [22.9, 87.7],
+                recipes: ["Fish Curry", "Rasgulla", "Kathi Rolls", "Biryani", "Mishti Doi"]
+            }
+        },
+
+        // Italy Regions
+        italy: {
+            lazio: {
+                name: "Lazio",
+                coords: [41.9, 12.9],
+                recipes: ["Carbonara", "Cacio e Pepe", "Amatriciana", "Saltimbocca", "Carciofi alla Romana"]
+            },
+            toscana: {
+                name: "Tuscany",
+                coords: [43.7, 10.9],
+                recipes: ["Bistecca Fiorentina", "Ribollita", "Pappa al Pomodoro", "Cantucci", "Pici"]
+            },
+            campania: {
+                name: "Campania",
+                coords: [40.8, 14.7],
+                recipes: ["Pizza Margherita", "Spaghetti alle Vongole", "Sfogliatella", "Limoncello", "Babà"]
+            },
+            emilia: {
+                name: "Emilia-Romagna",
+                coords: [44.5, 11.3],
+                recipes: ["Tagliatelle al Ragù", "Tortellini", "Parmigiano", "Prosciutto", "Lasagna"]
+            }
+        },
+
+        // China Provinces
+        china: {
+            sichuan: {
+                name: "Sichuan",
+                coords: [30.6, 102.9],
+                recipes: ["Mapo Tofu", "Kung Pao Chicken", "Hot Pot", "Dan Dan Noodles", "Chongqing Chicken"]
+            },
+            guangdong: {
+                name: "Guangdong",
+                coords: [23.3, 113.4],
+                recipes: ["Dim Sum", "Roast Duck", "Wonton Noodles", "Char Siu", "Congee"]
+            },
+            beijing: {
+                name: "Beijing",
+                coords: [39.9, 116.4],
+                recipes: ["Peking Duck", "Zha Jiang Mian", "Jianbing", "Mongolian Hot Pot", "Lǘdagunr"]
+            }
+        },
+
+        // Mexico States
+        mexico: {
+            oaxaca: {
+                name: "Oaxaca",
+                coords: [17.0, -96.7],
+                recipes: ["Mole Negro", "Tlayudas", "Memelas", "Mezcal", "Chapulines"]
+            },
+            yucatan: {
+                name: "Yucatán",
+                coords: [20.9, -89.0],
+                recipes: ["Cochinita Pibil", "Panuchos", "Sopa de Lima", "Poc Chuc", "Marquesitas"]
+            }
+        }
     },
-    japan: {
-        name: "Japan",
-        flag: "🇯🇵",
-        cuisine: "Japanese Cuisine",
-        recipes: [
-            {
-                name: "Sushi",
-                description: "Vinegared rice with fresh fish, seafood, or vegetables",
-                emoji: "🍣",
-                link: "https://www.allrecipes.com/recipe/189477/sushi-roll/"
-            },
-            {
-                name: "Ramen",
-                description: "Wheat noodles in rich broth with toppings like chashu pork and egg",
-                emoji: "🍜",
-                link: "https://www.allrecipes.com/recipe/246631/easy-homemade-ramen/"
-            },
-            {
-                name: "Tempura",
-                description: "Lightly battered and deep-fried seafood and vegetables",
-                emoji: "🍤",
-                link: "https://www.allrecipes.com/recipe/12838/shrimp-tempura/"
-            },
-            {
-                name: "Katsu Curry",
-                description: "Breaded pork cutlet served with Japanese curry and rice",
-                emoji: "🍛",
-                link: "https://www.allrecipes.com/recipe/246866/japanese-curry/"
-            },
-            {
-                name: "Matcha Tea",
-                description: "Finely ground green tea powder, traditionally prepared in ceremony",
-                emoji: "🍵",
-                link: "https://www.allrecipes.com/recipe/160912/traditional-matcha-tea/"
-            }
-        ],
-        coords: [36.5, 138.0]
-    },
-    india: {
-        name: "India",
-        flag: "🇮🇳",
-        cuisine: "Indian Cuisine",
-        recipes: [
-            {
-                name: "Butter Chicken",
-                description: "Creamy tomato-based curry with tender chicken pieces",
-                emoji: "🍗",
-                link: "https://www.allrecipes.com/recipe/246628/butter-chicken/"
-            },
-            {
-                name: "Biryani",
-                description: "Fragrant rice dish layered with spiced meat and saffron",
-                emoji: "🍚",
-                link: "https://www.allrecipes.com/recipe/161934/chicken-biryani/"
-            },
-            {
-                name: "Naan Bread",
-                description: "Soft, leavened flatbread baked in a tandoor oven",
-                emoji: "🫓",
-                link: "https://www.allrecipes.com/recipe/14522/naan/"
-            },
-            {
-                name: "Samosa",
-                description: "Crispy fried pastry filled with spiced potatoes and peas",
-                emoji: "🥟",
-                link: "https://www.allrecipes.com/recipe/53396/samosas/"
-            },
-            {
-                name: "Tandoori Chicken",
-                description: "Chicken marinated in yogurt and spices, roasted in tandoor",
-                emoji: "🍖",
-                link: "https://www.allrecipes.com/recipe/53391/tandoori-chicken-ii/"
-            }
-        ],
-        coords: [22.5, 79.0]
-    },
-    france: {
-        name: "France",
-        flag: "🇫🇷",
-        cuisine: "French Cuisine",
-        recipes: [
-            {
-                name: "Croissants",
-                description: "Buttery, flaky pastry in a crescent shape",
-                emoji: "🥐",
-                link: "https://www.allrecipes.com/recipe/16580/croissants/"
-            },
-            {
-                name: "Coq au Vin",
-                description: "Chicken braised with wine, mushrooms, and bacon",
-                emoji: "🍗",
-                link: "https://www.allrecipes.com/recipe/16325/coq-au-vin/"
-            },
-            {
-                name: "Ratatouille",
-                description: "Provençal vegetable stew with zucchini, eggplant, and tomatoes",
-                emoji: "🍲",
-                link: "https://www.allrecipes.com/recipe/222006/disneys-ratatouille/"
-            },
-            {
-                name: "Crème Brûlée",
-                description: "Rich custard with caramelized sugar crust",
-                emoji: "🍮",
-                link: "https://www.allrecipes.com/recipe/19165/creme-brulee/"
-            },
-            {
-                name: "French Onion Soup",
-                description: "Caramelized onion soup topped with melted cheese",
-                emoji: "🧅",
-                link: "https://www.allrecipes.com/recipe/13351/rich-and-simple-french-onion-soup/"
-            }
-        ],
-        coords: [46.5, 2.2]
-    },
-    thailand: {
-        name: "Thailand",
-        flag: "🇹🇭",
-        cuisine: "Thai Cuisine",
-        recipes: [
-            {
-                name: "Pad Thai",
-                description: "Stir-fried rice noodles with eggs, peanuts, and tamarind sauce",
-                emoji: "🍜",
-                link: "https://www.allrecipes.com/recipe/222658/pad-thai/"
-            },
-            {
-                name: "Green Curry",
-                description: "Spicy curry with coconut milk, Thai basil, and vegetables",
-                emoji: "🍛",
-                link: "https://www.allrecipes.com/recipe/165190/thai-green-curry-chicken/"
-            },
-            {
-                name: "Tom Yum Soup",
-                description: "Hot and sour soup with shrimp, lemongrass, and lime",
-                emoji: "🥣",
-                link: "https://www.allrecipes.com/recipe/143069/the-best-thai-coconut-soup/"
-            },
-            {
-                name: "Mango Sticky Rice",
-                description: "Sweet sticky rice with fresh mango and coconut cream",
-                emoji: "🥭",
-                link: "https://www.allrecipes.com/recipe/15382/thai-sweet-sticky-rice-with-mango/"
-            },
-            {
-                name: "Thai Iced Tea",
-                description: "Strong brewed tea with condensed milk served over ice",
-                emoji: "🧋",
-                link: "https://www.allrecipes.com/recipe/222901/thai-iced-tea/"
-            }
-        ],
-        coords: [15.0, 100.5]
-    },
-    usa: {
-        name: "United States",
-        flag: "🇺🇸",
-        cuisine: "American Cuisine",
-        recipes: [
-            {
-                name: "Classic Burger",
-                description: "Juicy beef patty with cheese, lettuce, tomato, and special sauce",
-                emoji: "🍔",
-                link: "https://www.allrecipes.com/recipe/72657/best-burger-ever/"
-            },
-            {
-                name: "BBQ Ribs",
-                description: "Slow-cooked pork ribs with smoky barbecue sauce",
-                emoji: "🍖",
-                link: "https://www.allrecipes.com/recipe/16496/slow-cooker-baby-back-ribs/"
-            },
-            {
-                name: "Apple Pie",
-                description: "Classic double-crust pie with cinnamon-spiced apples",
-                emoji: "🥧",
-                link: "https://www.allrecipes.com/recipe/12682/apple-pie/"
-            },
-            {
-                name: "Mac & Cheese",
-                description: "Creamy baked pasta with cheddar and breadcrumbs",
-                emoji: "🧀",
-                link: "https://www.allrecipes.com/recipe/11679/homemade-mac-and-cheese/"
-            },
-            {
-                name: "Fried Chicken",
-                description: "Crispy, golden-fried chicken with southern spices",
-                emoji: "🍗",
-                link: "https://www.allrecipes.com/recipe/8805/crispy-fried-chicken/"
-            }
-        ],
-        coords: [39.8, -98.5]
-    },
-    china: {
-        name: "China",
-        flag: "🇨🇳",
-        cuisine: "Chinese Cuisine",
-        recipes: [
-            {
-                name: "Kung Pao Chicken",
-                description: "Spicy stir-fried chicken with peanuts and vegetables",
-                emoji: "🥘",
-                link: "https://www.allrecipes.com/recipe/19202/kung-pao-chicken/"
-            },
-            {
-                name: "Dim Sum",
-                description: "Small bite-sized portions of food served in steamer baskets",
-                emoji: "🥟",
-                link: "https://www.allrecipes.com/recipe/14758/chinese-steamed-buns/"
-            },
-            {
-                name: "Fried Rice",
-                description: "Wok-tossed rice with eggs, vegetables, and soy sauce",
-                emoji: "🍚",
-                link: "https://www.allrecipes.com/recipe/79543/fried-rice/"
-            },
-            {
-                name: "Peking Duck",
-                description: "Crispy roasted duck served with pancakes and hoisin sauce",
-                emoji: "🦆",
-                link: "https://www.allrecipes.com/recipe/20455/peking-duck/"
-            },
-            {
-                name: "Hot Pot",
-                description: "Communal cooking in simmering broth with various ingredients",
-                emoji: "🍲",
-                link: "https://www.allrecipes.com/recipe/246866/chinese-hot-pot/"
-            }
-        ],
-        coords: [35.0, 104.0]
-    },
-    greece: {
-        name: "Greece",
-        flag: "🇬🇷",
-        cuisine: "Mediterranean Cuisine",
-        recipes: [
-            {
-                name: "Moussaka",
-                description: "Layered eggplant and potato casserole with ground meat",
-                emoji: "🍆",
-                link: "https://www.allrecipes.com/recipe/19649/moussaka/"
-            },
-            {
-                name: "Souvlaki",
-                description: "Grilled meat skewers served with pita and tzatziki",
-                emoji: "🍢",
-                link: "https://www.allrecipes.com/recipe/14713/souvlaki/"
-            },
-            {
-                name: "Baklava",
-                description: "Sweet pastry with layers of phyllo, nuts, and honey syrup",
-                emoji: "🥮",
-                link: "https://www.allrecipes.com/recipe/20287/greek-baklava/"
-            },
-            {
-                name: "Greek Salad",
-                description: "Fresh tomatoes, cucumbers, olives, and feta with olive oil",
-                emoji: "🥗",
-                link: "https://www.allrecipes.com/recipe/14373/greek-salad-i/"
-            },
-            {
-                name: "Gyros",
-                description: "Rotisserie meat wrapped in pita with vegetables and sauce",
-                emoji: "🌯",
-                link: "https://www.allrecipes.com/recipe/221309/traditional-gyros/"
-            }
-        ],
-        coords: [39.0, 22.0]
-    },
-    spain: {
-        name: "Spain",
-        flag: "🇪🇸",
-        cuisine: "Spanish Cuisine",
-        recipes: [
-            {
-                name: "Paella",
-                description: "Saffron rice dish with seafood, meat, and vegetables",
-                emoji: "🥘",
-                link: "https://www.allrecipes.com/recipe/21059/paella-i/"
-            },
-            {
-                name: "Gazpacho",
-                description: "Cold tomato soup with cucumber, pepper, and garlic",
-                emoji: "🥣",
-                link: "https://www.allrecipes.com/recipe/22254/gazpacho/"
-            },
-            {
-                name: "Churros",
-                description: "Fried dough pastries served with thick hot chocolate",
-                emoji: "🥨",
-                link: "https://www.allrecipes.com/recipe/41767/churros/"
-            },
-            {
-                name: "Tortilla Española",
-                description: "Spanish omelette with potatoes and onions",
-                emoji: "🍳",
-                link: "https://www.allrecipes.com/recipe/221893/tortilla-espanola/"
-            },
-            {
-                name: "Sangria",
-                description: "Fruity wine punch with fresh fruit and brandy",
-                emoji: "🍷",
-                link: "https://www.allrecipes.com/recipe/72612/sangria/"
-            }
-        ],
-        coords: [40.0, -4.0]
-    },
-    brazil: {
-        name: "Brazil",
-        flag: "🇧🇷",
-        cuisine: "Brazilian Cuisine",
-        recipes: [
-            {
-                name: "Feijoada",
-                description: "Black bean stew with pork, beef, and sausage",
-                emoji: "🍲",
-                link: "https://www.allrecipes.com/recipe/130261/brazilian-feijoada/"
-            },
-            {
-                name: "Churrasco",
-                description: "Brazilian barbecue with various grilled meats",
-                emoji: "🍖",
-                link: "https://www.allrecipes.com/recipe/221934/churrasco/"
-            },
-            {
-                name: "Brigadeiro",
-                description: "Chocolate fudge balls made with condensed milk",
-                emoji: "🍫",
-                link: "https://www.allrecipes.com/recipe/214193/brigadeiro/"
-            },
-            {
-                name: "Acai Bowl",
-                description: "Frozen acai berry smoothie bowl with granola and fruit",
-                emoji: "🫐",
-                link: "https://www.allrecipes.com/recipe/244562/acai-bowl/"
-            },
-            {
-                name: "Pão de Queijo",
-                description: "Chewy cheese bread balls made with tapioca flour",
-                emoji: "🧀",
-                link: "https://www.allrecipes.com/recipe/98352/pao-de-queijo/"
-            }
-        ],
-        coords: [-14.2, -51.9]
-    },
-    vietnam: {
-        name: "Vietnam",
-        flag: "🇻🇳",
-        cuisine: "Vietnamese Cuisine",
-        recipes: [
-            {
-                name: "Pho",
-                description: "Aromatic beef noodle soup with herbs and lime",
-                emoji: "🍜",
-                link: "https://www.allrecipes.com/recipe/228443/authentic-pho/"
-            },
-            {
-                name: "Banh Mi",
-                description: "French-Vietnamese sandwich with meat, pickles, and cilantro",
-                emoji: "🥖",
-                link: "https://www.allrecipes.com/recipe/187342/banh-mi/"
-            },
-            {
-                name: "Spring Rolls",
-                description: "Fresh rice paper rolls with shrimp, herbs, and vermicelli",
-                emoji: "🫔",
-                link: "https://www.allrecipes.com/recipe/24239/vietnamese-spring-rolls/"
-            },
-            {
-                name: "Vietnamese Coffee",
-                description: "Strong drip coffee with sweet condensed milk",
-                emoji: "☕",
-                link: "https://www.allrecipes.com/recipe/223397/vietnamese-iced-coffee/"
-            },
-            {
-                name: "Banh Xeo",
-                description: "Crispy turmeric crepes with shrimp and bean sprouts",
-                emoji: "🥞",
-                link: "https://www.allrecipes.com/recipe/247159/banh-xeo/"
-            }
-        ],
-        coords: [14.0, 108.3]
-    },
-    morocco: {
-        name: "Morocco",
-        flag: "🇲🇦",
-        cuisine: "North African Cuisine",
-        recipes: [
-            {
-                name: "Tagine",
-                description: "Slow-cooked stew with meat, vegetables, and dried fruits",
-                emoji: "🍲",
-                link: "https://www.allrecipes.com/recipe/189821/chicken-tagine/"
-            },
-            {
-                name: "Couscous",
-                description: "Steamed semolina grains with vegetables and meat",
-                emoji: "🌾",
-                link: "https://www.allrecipes.com/recipe/16858/couscous/"
-            },
-            {
-                name: "Harira",
-                description: "Hearty tomato-based soup with lentils and chickpeas",
-                emoji: "🥣",
-                link: "https://www.allrecipes.com/recipe/212942/moroccan-harira/"
-            },
-            {
-                name: "Mint Tea",
-                description: "Sweet green tea with fresh mint leaves",
-                emoji: "🍵",
-                link: "https://www.allrecipes.com/recipe/17027/moroccan-mint-tea/"
-            },
-            {
-                name: "Pastilla",
-                description: "Sweet and savory chicken pie with filo dough",
-                emoji: "🥧",
-                link: "https://www.allrecipes.com/recipe/202746/moroccan-pastilla/"
-            }
-        ],
-        coords: [31.8, -7.1]
-    },
-    lebanon: {
-        name: "Lebanon",
-        flag: "🇱🇧",
-        cuisine: "Levantine Cuisine",
-        recipes: [
-            {
-                name: "Hummus",
-                description: "Creamy chickpea dip with tahini, lemon, and garlic",
-                emoji: "🫘",
-                link: "https://www.allrecipes.com/recipe/23223/best-hummus/"
-            },
-            {
-                name: "Falafel",
-                description: "Deep-fried chickpea patties served in pita",
-                emoji: "🧆",
-                link: "https://www.allrecipes.com/recipe/18465/seans-falafel/"
-            },
-            {
-                name: "Tabbouleh",
-                description: "Fresh parsley and bulgur salad with tomatoes and mint",
-                emoji: "🥗",
-                link: "https://www.allrecipes.com/recipe/16678/tabbouleh-ii/"
-            },
-            {
-                name: "Shawarma",
-                description: "Spit-roasted meat wrapped in flatbread with tahini",
-                emoji: "🌯",
-                link: "https://www.allrecipes.com/recipe/222233/chicken-shawarma/"
-            },
-            {
-                name: "Baklava",
-                description: "Layered phyllo pastry with nuts and rose water syrup",
-                emoji: "🥮",
-                link: "https://www.allrecipes.com/recipe/20283/easy-baklava/"
-            }
-        ],
-        coords: [33.9, 35.9]
-    },
-    korea: {
-        name: "South Korea",
-        flag: "🇰🇷",
-        cuisine: "Korean Cuisine",
-        recipes: [
-            {
-                name: "Kimchi",
-                description: "Fermented vegetables, mainly napa cabbage and radishes",
-                emoji: "🥬",
-                link: "https://www.allrecipes.com/recipe/12984/kimchi/"
-            },
-            {
-                name: "Bibimbap",
-                description: "Rice bowl with vegetables, meat, egg, and gochujang",
-                emoji: "🍚",
-                link: "https://www.allrecipes.com/recipe/228240/bibimbap/"
-            },
-            {
-                name: "Korean BBQ",
-                description: "Grilled marinated meat, often cooked at the table",
-                emoji: "🥓",
-                link: "https://www.allrecipes.com/recipe/96698/bulgogi/"
-            },
-            {
-                name: "Tteokbokki",
-                description: "Spicy rice cakes in sweet and spicy red sauce",
-                emoji: "🍢",
-                link: "https://www.allrecipes.com/recipe/246551/tteokbokki/"
-            },
-            {
-                name: "Korean Fried Chicken",
-                description: "Ultra crispy chicken with sweet and spicy glaze",
-                emoji: "🍗",
-                link: "https://www.allrecipes.com/recipe/221839/korean-fried-chicken/"
-            }
-        ],
-        coords: [36.5, 127.9]
+
+    // National Recipes (shown when clicking country at lower zoom)
+    recipes: {
+        italy: {
+            national: [
+                { name: "Pizza Margherita", desc: "Classic Neapolitan pizza", emoji: "🍕" },
+                { name: "Pasta Carbonara", desc: "Creamy pasta with eggs and guanciale", emoji: "🍝" },
+                { name: "Tiramisu", desc: "Coffee-flavored dessert", emoji: "🍰" },
+                { name: "Risotto", desc: "Creamy saffron rice", emoji: "🍚" },
+                { name: "Osso Buco", desc: "Braised veal shanks", emoji: "🍖" }
+            ]
+        },
+        mexico: {
+            national: [
+                { name: "Tacos al Pastor", desc: "Spit-grilled pork tacos", emoji: "🌮" },
+                { name: "Guacamole", desc: "Fresh avocado dip", emoji: "🥑" },
+                { name: "Enchiladas", desc: "Corn tortillas with chili sauce", emoji: "🌯" },
+                { name: "Chiles en Nogada", desc: "Stuffed poblano peppers", emoji: "🌶️" },
+                { name: "Tamales", desc: "Steamed corn dough", emoji: "🫔" }
+            ]
+        },
+        japan: {
+            national: [
+                { name: "Sushi", desc: "Vinegared rice with fresh fish", emoji: "🍣" },
+                { name: "Ramen", desc: "Wheat noodles in rich broth", emoji: "🍜" },
+                { name: "Tempura", desc: "Lightly battered seafood", emoji: "🍤" },
+                { name: "Katsu Curry", desc: "Breaded pork with curry", emoji: "🍛" },
+                { name: "Matcha Tea", desc: "Finely ground green tea", emoji: "🍵" }
+            ]
+        },
+        india: {
+            national: [
+                { name: "Butter Chicken", desc: "Creamy tomato curry", emoji: "🍗" },
+                { name: "Biryani", desc: "Fragrant rice with spiced meat", emoji: "🍚" },
+                { name: "Naan Bread", desc: "Soft leavened flatbread", emoji: "🫓" },
+                { name: "Samosa", desc: "Crispy pastry with potatoes", emoji: "🥟" },
+                { name: "Tandoori Chicken", desc: "Yogurt-marinated roasted chicken", emoji: "🍖" }
+            ]
+        },
+        usa: {
+            national: [
+                { name: "Classic Burger", desc: "Juicy beef patty with cheese", emoji: "🍔" },
+                { name: "BBQ Ribs", desc: "Slow-cooked pork ribs", emoji: "🍖" },
+                { name: "Apple Pie", desc: "Classic double-crust pie", emoji: "🥧" },
+                { name: "Mac & Cheese", desc: "Creamy baked pasta", emoji: "🧀" },
+                { name: "Fried Chicken", desc: "Crispy southern fried chicken", emoji: "🍗" }
+            ]
+        }
     }
 };
 
-// Simple GeoJSON for country boundaries (simplified)
-const countryBoundaries = {
-    italy: [[47.1, 6.6], [47.1, 18.5], [35.5, 18.5], [35.5, 6.6]],
-    mexico: [[32.7, -117.0], [32.7, -86.7], [14.5, -86.7], [14.5, -117.0]],
-    japan: [[45.5, 129.4], [45.5, 145.8], [24.4, 145.8], [24.4, 129.4]],
-    india: [[35.5, 68.1], [35.5, 97.4], [6.7, 97.4], [6.7, 68.1]],
-    france: [[51.1, -5.1], [51.1, 9.6], [42.3, 9.6], [42.3, -5.1]],
-    thailand: [[20.4, 97.3], [20.4, 105.6], [5.6, 105.6], [5.6, 97.3]],
-    usa: [[49.4, -125.0], [49.4, -66.9], [24.5, -66.9], [24.5, -125.0]],
-    china: [[53.6, 73.5], [53.6, 134.8], [18.1, 134.8], [18.1, 73.5]],
-    greece: [[41.7, 19.4], [41.7, 28.2], [34.8, 28.2], [34.8, 19.4]],
-    spain: [[43.8, -9.3], [43.8, 4.3], [36.0, 4.3], [36.0, -9.3]],
-    brazil: [[5.3, -73.9], [5.3, -34.8], [-33.7, -34.8], [-33.7, -73.9]],
-    vietnam: [[23.4, 102.1], [23.4, 109.5], [8.6, 109.5], [8.6, 102.1]],
-    morocco: [[35.9, -13.2], [35.9, -1.0], [27.7, -1.0], [27.7, -13.2]],
-    lebanon: [[34.7, 35.1], [34.7, 36.6], [33.1, 36.6], [33.1, 35.1]],
-    korea: [[38.6, 124.6], [38.6, 131.0], [33.1, 131.0], [33.1, 124.6]]
-};
-
 let map;
-let currentLayer = null;
+let currentZoom = 2;
+let countryMarkers = [];
+let regionMarkers = [];
+let currentCountry = null;
 
 // Initialize map
 function initMap() {
@@ -600,80 +280,238 @@ function initMap() {
         center: [20, 0],
         zoom: 2,
         minZoom: 2,
-        maxZoom: 8,
+        maxZoom: 10,
+        zoomControl: false,
         worldCopyJump: true
     });
 
-    // Dark themed tiles
+    // Add zoom control to bottom right
+    L.control.zoom({
+        position: 'bottomright'
+    }).addTo(map);
+
+    // Add fullscreen control
+    map.addControl(new L.Control.Fullscreen({
+        position: 'bottomright'
+    }));
+
+    // Dark themed tiles (CartoDB Dark Matter)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
         subdomains: 'abcd',
         maxZoom: 19
     }).addTo(map);
 
-    // Add country markers/polygons
-    Object.keys(countryRecipes).forEach(countryKey => {
-        const country = countryRecipes[countryKey];
-        const coords = country.coords;
+    // Add country markers
+    addCountryMarkers();
+
+    // Zoom change handler
+    map.on('zoomend', handleZoomChange);
+
+    // Hide loading
+    setTimeout(() => {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+    }, 1000);
+}
+
+// Add country markers
+function addCountryMarkers() {
+    Object.keys(mapData.countries).forEach(key => {
+        const country = mapData.countries[key];
         
-        // Create custom marker
-        const marker = L.marker(coords, {
+        const marker = L.marker(country.coords, {
             icon: L.divIcon({
-                className: 'custom-marker',
-                html: `<div style="font-size: 32px; cursor: pointer; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">${country.flag}</div>`,
+                className: 'country-marker',
+                html: `<div style="
+                    font-size: 32px; 
+                    cursor: pointer; 
+                    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+                    transition: transform 0.2s;
+                " onmouseover="this.style.transform='scale(1.2)'" 
+                   onmouseout="this.style.transform='scale(1)'">${country.flag}</div>`,
                 iconSize: [40, 40],
                 iconAnchor: [20, 20]
             })
         }).addTo(map);
 
-        // Add popup
         marker.bindPopup(`
-            <div class="popup-country">${country.name} ${country.flag}</div>
-            <div class="popup-text">${country.cuisine}</div>
-            <div class="popup-click">Click to view recipes →</div>
+            <div class="popup-title">${country.name} ${country.flag}</div>
+            <div class="popup-subtitle">Click to explore recipes</div>
         `, {
             closeButton: false,
             offset: [0, -10]
         });
 
-        // Click handler
         marker.on('click', () => {
-            showCountryRecipes(countryKey);
+            if (country.hasRegions && map.getZoom() >= country.zoomThreshold) {
+                showRegions(key);
+            } else {
+                showCountryRecipes(key);
+            }
         });
+
+        countryMarkers.push({ key, marker });
     });
+}
+
+// Handle zoom changes
+function handleZoomChange() {
+    const newZoom = map.getZoom();
+    currentZoom = newZoom;
+    
+    // Update zoom indicator
+    let levelText = "World View";
+    if (newZoom >= 4) levelText = "Country View";
+    if (newZoom >= 6) levelText = "Regional View";
+    if (newZoom >= 8) levelText = "City View";
+    document.getElementById('zoomLevel').textContent = levelText;
+
+    // Show/hide region markers based on zoom
+    if (currentCountry && mapData.countries[currentCountry].hasRegions) {
+        const threshold = mapData.countries[currentCountry].zoomThreshold;
+        
+        if (newZoom >= threshold && regionMarkers.length === 0) {
+            addRegionMarkers(currentCountry);
+        } else if (newZoom < threshold && regionMarkers.length > 0) {
+            removeRegionMarkers();
+        }
+    }
 }
 
 // Show country recipes
 function showCountryRecipes(countryKey) {
-    const country = countryRecipes[countryKey];
-    if (!country) return;
-
-    // Update panel content
-    document.getElementById('countryFlag').textContent = country.flag;
-    document.getElementById('countryName').textContent = country.name;
-    document.getElementById('recipeCount').textContent = `${country.recipes.length} recipes`;
-    document.getElementById('cuisineType').textContent = country.cuisine;
-
-    // Build recipe cards
-    const recipesGrid = document.getElementById('recipesGrid');
-    recipesGrid.innerHTML = country.recipes.map(recipe => `
-        <div class="recipe-card" onclick="window.open('${recipe.link}', '_blank')">
-            <div class="recipe-image">${recipe.emoji}</div>
-            <div class="recipe-content">
-                <h3 class="recipe-title">${recipe.name}</h3>
-                <p class="recipe-desc">${recipe.description}</p>
-                <span class="recipe-link">View Recipe →</span>
+    const country = mapData.countries[countryKey];
+    const recipes = mapData.recipes[countryKey]?.national || [];
+    
+    currentCountry = countryKey;
+    
+    // Update panel
+    document.getElementById('breadcrumb').textContent = 'World';
+    document.getElementById('locationTitle').textContent = `${country.name} ${country.flag}`;
+    document.getElementById('locationSubtitle').textContent = 'Traditional National Dishes';
+    
+    // Build content
+    let content = '<div class="recipes-container">';
+    content += '<div class="section-title">Popular Dishes</div>';
+    
+    recipes.forEach(recipe => {
+        content += `
+            <div class="recipe-card" onclick="showRecipeDetail('${countryKey}', '${recipe.name}')">
+                <div class="recipe-image">${recipe.emoji}</div>
+                <div class="recipe-content">
+                    <h3 class="recipe-title">${recipe.name}</h3>
+                    <p class="recipe-desc">${recipe.desc}</p>
+                    <span class="recipe-link">View Recipe →</span>
+                </div>
             </div>
-        </div>
-    `).join('');
-
+        `;
+    });
+    
+    if (country.hasRegions) {
+        content += `
+            <div style="margin-top: 20px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px; text-align: center;">
+                <p style="color: var(--text-secondary); margin-bottom: 12px;">Want more specific recipes?</p>
+                <button onclick="zoomToCountry('${countryKey}')" style="
+                    background: var(--accent);
+                    color: #000;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    cursor: pointer;
+                ">Zoom to See Regions</button>
+            </div>
+        `;
+    }
+    
+    content += '</div>';
+    document.getElementById('panelContent').innerHTML = content;
+    
     // Show panel
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('countryContent').style.display = 'block';
     document.getElementById('sidePanel').classList.add('active');
+}
 
-    // Close popup if open
-    map.closePopup();
+// Add region markers
+function addRegionMarkers(countryKey) {
+    const regions = mapData.regions[countryKey];
+    if (!regions) return;
+    
+    Object.keys(regions).forEach(key => {
+        const region = regions[key];
+        
+        const marker = L.marker(region.coords, {
+            icon: L.divIcon({
+                className: 'region-marker',
+                html: `<div style="
+                    background: var(--accent);
+                    color: #000;
+                    padding: 6px 12px;
+                    border-radius: 16px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    white-space: nowrap;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    cursor: pointer;
+                ">${region.name}</div>`,
+                iconSize: [100, 30],
+                iconAnchor: [50, 15]
+            })
+        }).addTo(map);
+
+        marker.on('click', () => showRegionRecipes(countryKey, key));
+        regionMarkers.push(marker);
+    });
+}
+
+// Remove region markers
+function removeRegionMarkers() {
+    regionMarkers.forEach(marker => map.removeLayer(marker));
+    regionMarkers = [];
+}
+
+// Show region recipes
+function showRegionRecipes(countryKey, regionKey) {
+    const country = mapData.countries[countryKey];
+    const region = mapData.regions[countryKey][regionKey];
+    
+    document.getElementById('breadcrumb').textContent = `World → ${country.name}`;
+    document.getElementById('locationTitle').textContent = region.name;
+    document.getElementById('locationSubtitle').textContent = `Regional Specialties of ${country.name}`;
+    
+    let content = '<div class="recipes-container">';
+    content += '<div class="section-title">Local Specialties</div>';
+    
+    region.recipes.forEach(recipe => {
+        content += `
+            <div class="recipe-card">
+                <div class="recipe-image">🍽️</div>
+                <div class="recipe-content">
+                    <h3 class="recipe-title">${recipe}</h3>
+                    <p class="recipe-desc">Traditional ${region.name} specialty</p>
+                    <span class="recipe-link">View Recipe →</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    content += '</div>';
+    document.getElementById('panelContent').innerHTML = content;
+}
+
+// Zoom to country
+function zoomToCountry(countryKey) {
+    const country = mapData.countries[countryKey];
+    if (country.bounds) {
+        map.fitBounds(country.bounds, { padding: [50, 50] });
+    } else {
+        map.setView(country.coords, country.zoomThreshold || 5);
+    }
+}
+
+// Show recipe detail (placeholder)
+function showRecipeDetail(country, recipe) {
+    // In future: open external recipe link or show modal
+    window.open(`https://www.google.com/search?q=${recipe}+recipe`, '_blank');
 }
 
 // Close panel
@@ -681,10 +519,32 @@ function closePanel() {
     document.getElementById('sidePanel').classList.remove('active');
 }
 
-// Dismiss welcome overlay
-function dismissWelcome() {
-    document.getElementById('welcomeOverlay').classList.add('hidden');
-}
+// Search functionality
+document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const query = e.target.value.toLowerCase();
+        
+        // Search countries
+        for (const [key, country] of Object.entries(mapData.countries)) {
+            if (country.name.toLowerCase().includes(query)) {
+                map.setView(country.coords, 5);
+                showCountryRecipes(key);
+                return;
+            }
+        }
+        
+        // Search regions
+        for (const [countryKey, regions] of Object.entries(mapData.regions)) {
+            for (const [regionKey, region] of Object.entries(regions)) {
+                if (region.name.toLowerCase().includes(query)) {
+                    map.setView(region.coords, 7);
+                    showRegionRecipes(countryKey, regionKey);
+                    return;
+                }
+            }
+        }
+    }
+});
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', initMap);
