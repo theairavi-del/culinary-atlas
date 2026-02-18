@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Culinary Atlas | Explore World Recipes</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-fullscreen/1.0.2/leaflet.fullscreen.css" />
+    <title>Culinary Atlas | 3D Globe Explorer</title>
+    <script src="https://unpkg.com/globe.gl@2.24.13/dist/globe.gl.min.js"></script>
     <style>
         :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #141414;
-            --bg-tertiary: #1f1f1f;
-            --border: #2a2a2a;
-            --accent: #4285F4;
-            --accent-hover: #5294FF;
+            --bg-primary: #050505;
+            --bg-secondary: #0a0a0a;
+            --accent: #00d4ff;
             --text-primary: #ffffff;
             --text-secondary: #a0a0a0;
         }
@@ -38,57 +34,62 @@
             left: 0;
             right: 0;
             height: 60px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
+            background: rgba(5, 5, 5, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #1a1a1a;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 16px;
+            padding: 0 24px;
             z-index: 1000;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .logo-icon {
             width: 36px;
             height: 36px;
             background: var(--accent);
-            border-radius: 8px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-weight: 700;
+            color: #000;
         }
 
         .logo-text {
             font-size: 18px;
             font-weight: 600;
+            letter-spacing: -0.5px;
         }
 
         .search-box {
             flex: 1;
-            max-width: 600px;
-            margin: 0 20px;
+            max-width: 400px;
+            margin: 0 24px;
             position: relative;
         }
 
         .search-box input {
             width: 100%;
             padding: 10px 16px 10px 40px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2a2a2a;
             border-radius: 24px;
             color: var(--text-primary);
             font-size: 14px;
             outline: none;
+            transition: all 0.2s;
         }
 
         .search-box input:focus {
             border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .search-icon {
@@ -97,35 +98,23 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-secondary);
+            font-size: 14px;
         }
 
-        /* Map Container */
-        #map {
+        /* Globe Container */
+        #globeViz {
             position: fixed;
             top: 60px;
             left: 0;
-            right: 0;
+            right: 400px;
             bottom: 0;
             z-index: 1;
         }
 
-        /* Zoom Level Indicator */
-        .zoom-indicator {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 16px;
-            z-index: 1000;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .zoom-indicator .level {
-            color: var(--accent);
-            font-weight: 600;
+        @media (max-width: 900px) {
+            #globeViz {
+                right: 0;
+            }
         }
 
         /* Side Panel */
@@ -135,24 +124,32 @@
             right: 0;
             width: 400px;
             bottom: 0;
-            background: var(--bg-secondary);
-            border-left: 1px solid var(--border);
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            z-index: 1001;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid #1a1a1a;
             overflow-y: auto;
+            z-index: 100;
+            transform: translateX(0);
+            transition: transform 0.3s ease;
         }
 
-        .side-panel.active {
-            transform: translateX(0);
+        @media (max-width: 900px) {
+            .side-panel {
+                width: 100%;
+                transform: translateX(100%);
+            }
+            .side-panel.active {
+                transform: translateX(0);
+            }
         }
 
         .panel-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
+            padding: 24px;
+            border-bottom: 1px solid #1a1a1a;
             position: sticky;
             top: 0;
-            background: var(--bg-secondary);
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
             z-index: 10;
         }
 
@@ -162,150 +159,175 @@
             right: 16px;
             width: 32px;
             height: 32px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
             color: var(--text-secondary);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 16px;
+            transition: all 0.2s;
         }
 
-        .breadcrumb {
-            font-size: 12px;
-            color: var(--accent);
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .location-flag {
+            font-size: 32px;
             margin-bottom: 8px;
         }
 
-        .location-title {
+        .location-name {
             font-size: 24px;
             font-weight: 700;
             margin-bottom: 4px;
         }
 
-        .location-subtitle {
-            font-size: 14px;
-            color: var(--text-secondary);
+        .location-region {
+            font-size: 13px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* Recipe Grid */
-        .recipes-container {
+        .recipes-list {
             padding: 16px;
         }
 
-        .section-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-        }
-
         .recipe-card {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #1a1a1a;
             border-radius: 12px;
             overflow: hidden;
             margin-bottom: 12px;
-            cursor: pointer;
             transition: all 0.2s;
         }
 
         .recipe-card:hover {
             border-color: var(--accent);
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .recipe-image {
             width: 100%;
-            height: 140px;
+            height: 160px;
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recipe-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .recipe-image-placeholder {
             font-size: 48px;
+            opacity: 0.3;
+        }
+
+        .recipe-rare {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 212, 255, 0.9);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .recipe-content {
-            padding: 14px;
+            padding: 16px;
         }
 
         .recipe-title {
             font-size: 15px;
             font-weight: 600;
             margin-bottom: 6px;
+            line-height: 1.3;
         }
 
         .recipe-desc {
             font-size: 13px;
             color: var(--text-secondary);
-            line-height: 1.4;
-            margin-bottom: 10px;
+            line-height: 1.5;
+            margin-bottom: 12px;
         }
 
-        .recipe-meta {
-            display: flex;
-            gap: 12px;
-            font-size: 12px;
-            color: var(--text-secondary);
+        .recipe-origin {
+            font-size: 11px;
+            color: var(--accent);
+            margin-bottom: 12px;
         }
 
         .recipe-link {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            color: var(--accent);
-            font-size: 12px;
-            font-weight: 600;
+            gap: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 500;
             text-decoration: none;
-            margin-top: 8px;
-        }
-
-        /* Region List (for zoomed in view) */
-        .region-list {
-            padding: 16px;
-        }
-
-        .region-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 8px;
-            cursor: pointer;
+            padding: 8px 16px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
             transition: all 0.2s;
         }
 
-        .region-item:hover {
+        .recipe-link:hover {
+            background: rgba(0, 212, 255, 0.2);
             border-color: var(--accent);
         }
 
-        .region-flag {
-            font-size: 24px;
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 40px;
+            text-align: center;
         }
 
-        .region-info {
-            flex: 1;
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+            border: 1px solid #2a2a2a;
         }
 
-        .region-name {
+        .empty-title {
+            font-size: 18px;
             font-weight: 600;
-            font-size: 14px;
+            margin-bottom: 8px;
         }
 
-        .region-count {
-            font-size: 12px;
+        .empty-text {
             color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
         }
 
-        /* Loading State */
-        .loading-overlay {
+        .loading {
             position: fixed;
             top: 0;
             left: 0;
@@ -320,7 +342,7 @@
             transition: opacity 0.5s;
         }
 
-        .loading-overlay.hidden {
+        .loading.hidden {
             opacity: 0;
             pointer-events: none;
         }
@@ -328,7 +350,7 @@
         .loading-spinner {
             width: 48px;
             height: 48px;
-            border: 3px solid var(--border);
+            border: 3px solid #1a1a1a;
             border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -344,153 +366,51 @@
             font-size: 14px;
         }
 
-        /* Map Controls */
-        .leaflet-control-zoom {
-            border: none !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
-        }
-
-        .leaflet-control-zoom a {
-            background: var(--bg-secondary) !important;
-            color: var(--text-primary) !important;
-            border-color: var(--border) !important;
-            width: 36px !important;
-            height: 36px !important;
-            line-height: 36px !important;
-            font-size: 18px !important;
-        }
-
-        .leaflet-control-zoom a:hover {
-            background: var(--bg-tertiary) !important;
-        }
-
-        /* Popup Styling */
-        .leaflet-popup-content-wrapper {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            padding: 4px;
-        }
-
-        .leaflet-popup-tip {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-        }
-
-        .popup-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .popup-subtitle {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .popup-hint {
+        .section-title {
             font-size: 11px;
-            color: var(--accent);
-            margin-top: 8px;
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .side-panel {
-                width: 100%;
-            }
-            
-            .search-box {
-                display: none;
-            }
-        }
-
-        /* Stats Bar */
-        .stats-bar {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 20px;
-            z-index: 1000;
-            display: flex;
-            gap: 24px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        .stat-label {
-            font-size: 11px;
+            font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 24px 12px;
+            margin-top: 8px;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
+    <!-- Loading -->
+    <div class="loading" id="loading">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Loading Culinary Atlas...</div>
+        <div class="loading-text">Loading 3D Globe...</div>
     </div>
 
     <!-- Header -->
     <header class="header">
         <div class="logo">
-            <div class="logo-icon">🌍</div>
+            <div class="logo-icon">CA</div>
             <div class="logo-text">Culinary Atlas</div>
         </div>
         <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" placeholder="Search countries, regions, or recipes..." id="searchInput">
+            <span class="search-icon">Search</span>
+            <input type="text" placeholder="Find country or region..." id="searchInput">
         </div>
     </header>
 
-    <!-- Map -->
-    <div id="map"></div>
-
-    <!-- Zoom Level Indicator -->
-    <div class="zoom-indicator">
-        Zoom: <span class="level" id="zoomLevel">World View</span>
-    </div>
-
-    <!-- Stats Bar -->
-    <div class="stats-bar">
-        <div class="stat-item">
-            <div class="stat-value" id="totalCountries">15</div>
-            <div class="stat-label">Countries</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-value" id="totalRecipes">75+</div>
-            <div class="stat-label">Recipes</div>
-        </div>
-    </div>
+    <!-- 3D Globe -->
+    <div id="globeViz"></div>
 
     <!-- Side Panel -->
     <div class="side-panel" id="sidePanel">
-        <div class="panel-header">
-            <button class="close-btn" onclick="closePanel()">✕</button>
-            <div class="breadcrumb" id="breadcrumb">World</div>
-            <h2 class="location-title" id="locationTitle">Select a Location</h2>
-            <p class="location-subtitle" id="locationSubtitle">Explore recipes from around the world</p>
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">G</div>
+            <h2 class="empty-title">Explore the World</h2>
+            <p class="empty-text">Click on any marker to discover authentic regional recipes</p>
         </div>
-        <div id="panelContent">
-            <!-- Dynamic content here -->
+        <div id="contentArea" style="display: none;">
+            <!-- Dynamic content -->
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-fullscreen/1.0.2/Leaflet.fullscreen.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
