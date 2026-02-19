@@ -4,7 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Culinary Atlas | 3D Globe Explorer</title>
-    <script src="https://unpkg.com/globe.gl@2.24.13/dist/globe.gl.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.24.13/dist/globe.gl.min.js" onerror="handleScriptError()"></script>
+    <script>
+        function handleScriptError() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.getElementById('loadingText').innerHTML = 'Failed to load 3D library<br><span style="font-size:12px;opacity:0.7">Check your connection or try again later</span>';
+            document.getElementById('loadingError').style.display = 'block';
+        }
+        
+        // Check WebGL support
+        function checkWebGL() {
+            try {
+                const canvas = document.createElement('canvas');
+                return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+            } catch (e) {
+                return false;
+            }
+        }
+        
+        if (!checkWebGL()) {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('loadingText').innerHTML = 'WebGL not supported<br><span style="font-size:12px;opacity:0.7">Try a different browser (Chrome, Firefox, Safari)</span>';
+            });
+        }
+    </script>
     <style>
         :root {
             --bg-primary: #050505;

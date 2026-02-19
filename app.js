@@ -111,6 +111,14 @@ let currentCountry = null;
 let globeLoaded = false;
 
 function initGlobe() {
+    // Check if Globe.gl is loaded
+    if (typeof Globe === 'undefined') {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        document.getElementById('loadingText').innerHTML = 'Loading 3D library...<br><span style="font-size:12px;opacity:0.7">This may take a moment</span>';
+        setTimeout(initGlobe, 1000);
+        return;
+    }
+    
     // Set a timeout to show error if globe doesn't load
     const loadTimeout = setTimeout(() => {
         if (!globeLoaded) {
@@ -121,16 +129,21 @@ function initGlobe() {
     }, 15000);
 
     try {
+        const globeContainer = document.getElementById('globeViz');
+        if (!globeContainer) {
+            throw new Error('Globe container not found');
+        }
+        
         globe = Globe()
-            .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
-            .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+            .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg')
+            .bumpImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png')
             .backgroundColor('rgba(5,5,5,0)')
             .showAtmosphere(true)
             .atmosphereColor('#00d4ff')
             .atmosphereAltitude(0.15)
             .width(window.innerWidth - 400)
             .height(window.innerHeight - 60)
-            (document.getElementById('globeViz'));
+            (globeContainer);
         
         globeLoaded = true;
         clearTimeout(loadTimeout);
