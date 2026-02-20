@@ -3,32 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Culinary Atlas | 3D Globe Explorer</title>
-    <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.24.13/dist/globe.gl.min.js" onerror="handleScriptError()"></script>
-    <script>
-        function handleScriptError() {
-            document.getElementById('loadingSpinner').style.display = 'none';
-            document.getElementById('loadingText').innerHTML = 'Failed to load 3D library<br><span style="font-size:12px;opacity:0.7">Check your connection or try again later</span>';
-            document.getElementById('loadingError').style.display = 'block';
-        }
-        
-        // Check WebGL support
-        function checkWebGL() {
-            try {
-                const canvas = document.createElement('canvas');
-                return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-            } catch (e) {
-                return false;
-            }
-        }
-        
-        if (!checkWebGL()) {
-            document.addEventListener('DOMContentLoaded', () => {
-                document.getElementById('loadingSpinner').style.display = 'none';
-                document.getElementById('loadingText').innerHTML = 'WebGL not supported<br><span style="font-size:12px;opacity:0.7">Try a different browser (Chrome, Firefox, Safari)</span>';
-            });
-        }
-    </script>
+    <title>Culinary Atlas | World Recipe Explorer</title>
     <style>
         :root {
             --bg-primary: #050505;
@@ -43,14 +18,12 @@
             padding: 0;
             box-sizing: border-box;
         }
-
-        @import url('https://fonts.cdnfonts.com/css/helvetica-neue-5');
         
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            overflow: hidden;
+            min-height: 100vh;
         }
 
         /* Header */
@@ -60,7 +33,7 @@
             left: 0;
             right: 0;
             height: 60px;
-            background: rgba(5, 5, 5, 0.9);
+            background: rgba(5, 5, 5, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid #1a1a1a;
             display: flex;
@@ -127,20 +100,62 @@
             font-size: 14px;
         }
 
-        /* Globe Container */
-        #globeViz {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            right: 400px;
-            bottom: 0;
-            z-index: 1;
+        /* Main Content */
+        .main-content {
+            padding-top: 60px;
+            display: flex;
+            min-height: 100vh;
         }
 
-        @media (max-width: 900px) {
-            #globeViz {
-                right: 0;
-            }
+        /* World Map Container */
+        .map-container {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .world-map {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+            padding: 20px;
+        }
+
+        .country-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 20px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .country-card:hover {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-2px);
+        }
+
+        .country-flag {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        .country-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .country-recipes {
+            font-size: 11px;
+            color: var(--text-secondary);
         }
 
         /* Side Panel */
@@ -148,24 +163,52 @@
             position: fixed;
             top: 60px;
             right: 0;
-            width: 400px;
+            width: 420px;
             bottom: 0;
-            background: rgba(10, 10, 10, 0.95);
+            background: rgba(10, 10, 10, 0.98);
             backdrop-filter: blur(20px);
             border-left: 1px solid #1a1a1a;
             overflow-y: auto;
             z-index: 100;
-            transform: translateX(0);
+            transform: translateX(100%);
             transition: transform 0.3s ease;
+        }
+
+        .side-panel.active {
+            transform: translateX(0);
         }
 
         @media (max-width: 900px) {
             .side-panel {
                 width: 100%;
-                transform: translateX(100%);
             }
-            .side-panel.active {
-                transform: translateX(0);
+            
+            .world-map {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                padding: 16px;
+            }
+            
+            .country-flag {
+                font-size: 32px;
+            }
+            
+            .country-name {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .world-map {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .search-box {
+                margin: 0 12px;
+            }
+            
+            .logo-text {
+                display: none;
             }
         }
 
@@ -174,7 +217,7 @@
             border-bottom: 1px solid #1a1a1a;
             position: sticky;
             top: 0;
-            background: rgba(10, 10, 10, 0.95);
+            background: rgba(10, 10, 10, 0.98);
             backdrop-filter: blur(20px);
             z-index: 10;
         }
@@ -193,7 +236,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 18px;
             transition: all 0.2s;
         }
 
@@ -203,12 +246,12 @@
         }
 
         .location-flag {
-            font-size: 32px;
-            margin-bottom: 8px;
+            font-size: 48px;
+            margin-bottom: 12px;
         }
 
         .location-name {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             margin-bottom: 4px;
         }
@@ -240,82 +283,42 @@
 
         .recipe-image {
             width: 100%;
-            height: 160px;
+            height: 180px;
             background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .recipe-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .recipe-image-placeholder {
-            font-size: 48px;
-            opacity: 0.3;
-        }
-
-        .recipe-rare {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: rgba(0, 212, 255, 0.9);
-            color: #000;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 60px;
         }
 
         .recipe-content {
             padding: 16px;
         }
 
-        .recipe-title {
-            font-size: 15px;
+        .recipe-name {
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 6px;
-            line-height: 1.3;
+            margin-bottom: 8px;
         }
 
-        .recipe-desc {
+        .recipe-description {
             font-size: 13px;
             color: var(--text-secondary);
             line-height: 1.5;
             margin-bottom: 12px;
         }
 
-        .recipe-origin {
-            font-size: 11px;
-            color: var(--accent);
-            margin-bottom: 12px;
+        .recipe-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
         }
 
-        .recipe-link {
-            display: inline-flex;
+        .recipe-meta span {
+            display: flex;
             align-items: center;
-            gap: 6px;
-            color: var(--text-primary);
-            font-size: 13px;
-            font-weight: 500;
-            text-decoration: none;
-            padding: 8px 16px;
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-
-        .recipe-link:hover {
-            background: rgba(0, 212, 255, 0.2);
-            border-color: var(--accent);
+            gap: 4px;
         }
 
         .empty-state {
@@ -329,20 +332,13 @@
         }
 
         .empty-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin-bottom: 20px;
-            border: 1px solid #2a2a2a;
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
         }
 
         .empty-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
             margin-bottom: 8px;
         }
@@ -353,92 +349,26 @@
             line-height: 1.5;
         }
 
-        .loading {
+        .back-overlay {
             position: fixed;
-            top: 0;
+            top: 60px;
             left: 0;
             right: 0;
             bottom: 0;
-            background: var(--bg-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s;
-        }
-
-        .loading.hidden {
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 50;
             opacity: 0;
             pointer-events: none;
+            transition: opacity 0.3s;
         }
 
-        .loading-spinner {
-            width: 48px;
-            height: 48px;
-            border: 3px solid #1a1a1a;
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            margin-top: 16px;
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .loading-error {
-            margin-top: 20px;
-            padding: 16px 24px;
-            background: rgba(255, 59, 48, 0.1);
-            border: 1px solid rgba(255, 59, 48, 0.3);
-            border-radius: 8px;
-            color: #ff3b30;
-            font-size: 14px;
-            max-width: 400px;
-            text-align: center;
-            display: none;
-        }
-
-        .loading-retry {
-            margin-top: 12px;
-            padding: 10px 20px;
-            background: var(--accent);
-            color: #000;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .section-title {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 0 24px 12px;
-            margin-top: 8px;
+        .back-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
         }
     </style>
 </head>
 <body>
-    <!-- Loading -->
-    <div class="loading" id="loading">
-        <div class="loading-spinner" id="loadingSpinner"></div>
-        <div class="loading-text" id="loadingText">Loading 3D Globe...</div>
-        <div class="loading-error" id="loadingError">
-            <div>Unable to load 3D globe</div>
-            <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Please check your connection or try refreshing</div>
-            <button class="loading-retry" onclick="location.reload()">Reload</button>
-        </div>
-    </div>
-
     <!-- Header -->
     <header class="header">
         <div class="logo">
@@ -447,25 +377,195 @@
         </div>
         <div class="search-box">
             <span class="search-icon">Search</span>
-            <input type="text" placeholder="Find country or region..." id="searchInput">
+            <input type="text" placeholder="Find country..." id="searchInput">
         </div>
     </header>
 
-    <!-- 3D Globe -->
-    <div id="globeViz"></div>
+    <!-- Back Overlay -->
+    <div class="back-overlay" id="backOverlay" onclick="closePanel()"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="map-container">
+            <div class="world-map" id="worldMap"></div>
+        </div>
+    </div>
 
     <!-- Side Panel -->
     <div class="side-panel" id="sidePanel">
         <div class="empty-state" id="emptyState">
             <div class="empty-icon">G</div>
-            <h2 class="empty-title">Explore the World</h2>
-            <p class="empty-text">Click on any marker to discover authentic regional recipes</p>
+            <h2 class="empty-title">Select a Country</h2>
+            <p class="empty-text">Click on any country to discover authentic regional recipes</p>
         </div>
         <div id="contentArea" style="display: none;">
-            <!-- Dynamic content -->
+            <div class="panel-header">
+                <button class="close-btn" onclick="closePanel()">&times;</button>
+                <div class="location-flag" id="panelFlag">G</div>
+                <h1 class="location-name" id="panelName">Select a Country</h1>
+                <p class="location-region" id="panelRegion">World Cuisine</p>
+            </div>
+            <div class="recipes-list" id="recipesList"></div>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        const countries = [
+            { code: 'IT', name: 'Italy', flag: 'IT', region: 'Europe', recipes: [
+                { name: 'Ossobuco alla Milanese', desc: 'Braised veal shanks in white wine and broth', icon: 'M' },
+                { name: 'Ribollita', desc: 'Hearty Tuscan bread and vegetable soup', icon: 'S' }
+            ]},
+            { code: 'JP', name: 'Japan', flag: 'JP', region: 'Asia', recipes: [
+                { name: 'Kaiseki Ryori', desc: 'Traditional multi-course dinner', icon: 'B' },
+                { name: 'Okonomiyaki', desc: 'Savory pancake from Osaka', icon: 'P' }
+            ]},
+            { code: 'MX', name: 'Mexico', flag: 'MX', region: 'North America', recipes: [
+                { name: 'Mole Poblano', desc: 'Rich sauce with chocolate and chiles', icon: 'C' },
+                { name: 'Tamales Oaxaqueños', desc: 'Corn dough with mole wrapped in banana leaves', icon: 'T' }
+            ]},
+            { code: 'IN', name: 'India', flag: 'IN', region: 'Asia', recipes: [
+                { name: 'Hyderabadi Biryani', desc: 'Fragrant rice with spiced meat', icon: 'R' },
+                { name: 'Rogan Josh', desc: 'Aromatic lamb curry from Kashmir', icon: 'C' }
+            ]},
+            { code: 'FR', name: 'France', flag: 'FR', region: 'Europe', recipes: [
+                { name: 'Bouillabaisse', desc: 'Provençal fish stew from Marseille', icon: 'F' },
+                { name: 'Cassoulet', desc: 'Slow-cooked bean and meat casserole', icon: 'B' }
+            ]},
+            { code: 'TH', name: 'Thailand', flag: 'TH', region: 'Asia', recipes: [
+                { name: 'Massaman Curry', desc: 'Rich Muslim-influenced curry', icon: 'C' },
+                { name: 'Som Tam', desc: 'Spicy green papaya salad', icon: 'S' }
+            ]},
+            { code: 'GR', name: 'Greece', flag: 'GR', region: 'Europe', recipes: [
+                { name: 'Moussaka', desc: 'Layered eggplant and meat casserole', icon: 'M' },
+                { name: 'Souvlaki', desc: 'Grilled meat skewers', icon: 'K' }
+            ]},
+            { code: 'VN', name: 'Vietnam', flag: 'VN', region: 'Asia', recipes: [
+                { name: 'Pho Bo', desc: 'Beef noodle soup from Hanoi', icon: 'N' },
+                { name: 'Banh Xeo', desc: 'Crispy turmeric crepe', icon: 'P' }
+            ]},
+            { code: 'ES', name: 'Spain', flag: 'ES', region: 'Europe', recipes: [
+                { name: 'Paella Valenciana', desc: 'Saffron rice with rabbit and snails', icon: 'R' },
+                { name: 'Gazpacho Andaluz', desc: 'Cold tomato soup from Andalusia', icon: 'S' }
+            ]},
+            { code: 'KR', name: 'Korea', flag: 'KR', region: 'Asia', recipes: [
+                { name: 'Kimchi Jjigae', desc: 'Spicy kimchi stew with pork', icon: 'S' },
+                { name: 'Bulgogi', desc: 'Marinated grilled beef', icon: 'B' }
+            ]},
+            { code: 'MA', name: 'Morocco', flag: 'MA', region: 'Africa', recipes: [
+                { name: 'Tagine', desc: 'Slow-cooked stew in clay pot', icon: 'T' },
+                { name: 'Couscous', desc: 'Steamed semolina with vegetables', icon: 'C' }
+            ]},
+            { code: 'LB', name: 'Lebanon', flag: 'LB', region: 'Middle East', recipes: [
+                { name: 'Kibbeh', desc: 'Bulgur and minced meat croquettes', icon: 'K' },
+                { name: 'Fattoush', desc: 'Bread salad with sumac', icon: 'S' }
+            ]},
+            { code: 'TR', name: 'Turkey', flag: 'TR', region: 'Middle East', recipes: [
+                { name: 'Iskender Kebab', desc: 'Bursa-style doner with yogurt', icon: 'K' },
+                { name: 'Manti', desc: 'Turkish dumplings with garlic yogurt', icon: 'D' }
+            ]},
+            { code: 'PE', name: 'Peru', flag: 'PE', region: 'South America', recipes: [
+                { name: 'Ceviche', desc: 'Raw fish cured in citrus', icon: 'F' },
+                { name: 'Lomo Saltado', desc: 'Beef stir-fry with soy sauce', icon: 'B' }
+            ]},
+            { code: 'BR', name: 'Brazil', flag: 'BR', region: 'South America', recipes: [
+                { name: 'Feijoada', desc: 'Black bean stew with pork', icon: 'S' },
+                { name: 'Moqueca', desc: 'Fish stew with coconut milk', icon: 'F' }
+            ]},
+            { code: 'CN', name: 'China', flag: 'CN', region: 'Asia', recipes: [
+                { name: 'Peking Duck', desc: 'Crispy roasted duck from Beijing', icon: 'D' },
+                { name: 'Dim Sum', desc: 'Cantonese small plates', icon: 'B' }
+            ]},
+            { code: 'US', name: 'USA', flag: 'US', region: 'North America', recipes: [
+                { name: 'Cajun Gumbo', desc: 'Louisiana creole stew', icon: 'S' },
+                { name: 'Southern BBQ', desc: 'Low and slow smoked meats', icon: 'B' }
+            ]},
+            { code: 'AU', name: 'Australia', flag: 'AU', region: 'Oceania', recipes: [
+                { name: 'Meat Pie', desc: 'Savory beef pastry', icon: 'P' },
+                { name: 'Barramundi', desc: 'Grilled native fish', icon: 'F' }
+            ]},
+            { code: 'EG', name: 'Egypt', flag: 'EG', region: 'Africa', recipes: [
+                { name: 'Koshari', desc: 'Rice, lentils, and pasta mix', icon: 'R' },
+                { name: 'Ful Medames', desc: 'Fava bean breakfast stew', icon: 'B' }
+            ]},
+            { code: 'ZA', name: 'South Africa', flag: 'ZA', region: 'Africa', recipes: [
+                { name: 'Bobotie', desc: 'Curried mince with egg topping', icon: 'C' },
+                { name: 'Bunny Chow', desc: 'Curry served in bread loaf', icon: 'B' }
+            ]}
+        ];
+
+        function renderCountries(filter = '') {
+            const container = document.getElementById('worldMap');
+            container.innerHTML = '';
+            
+            const filtered = countries.filter(c => 
+                c.name.toLowerCase().includes(filter.toLowerCase()) ||
+                c.region.toLowerCase().includes(filter.toLowerCase())
+            );
+            
+            filtered.forEach(country => {
+                const card = document.createElement('div');
+                card.className = 'country-card';
+                card.onclick = () => openCountry(country);
+                
+                card.innerHTML = `
+                    <div class="country-flag">${getFlagEmoji(country.code)}</div>
+                    <div class="country-name">${country.name}</div>
+                    <div class="country-recipes">${country.recipes.length} recipes</div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function getFlagEmoji(countryCode) {
+            const codePoints = countryCode
+                .toUpperCase()
+                .split('')
+                .map(char => 127397 + char.charCodeAt());
+            return String.fromCodePoint(...codePoints);
+        }
+
+        function openCountry(country) {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('contentArea').style.display = 'block';
+            document.getElementById('sidePanel').classList.add('active');
+            document.getElementById('backOverlay').classList.add('active');
+            
+            document.getElementById('panelFlag').textContent = getFlagEmoji(country.code);
+            document.getElementById('panelName').textContent = country.name;
+            document.getElementById('panelRegion').textContent = country.region;
+            
+            const recipesList = document.getElementById('recipesList');
+            recipesList.innerHTML = '';
+            
+            country.recipes.forEach(recipe => {
+                const card = document.createElement('div');
+                card.className = 'recipe-card';
+                card.innerHTML = `
+                    <div class="recipe-image">${recipe.icon}</div>
+                    <div class="recipe-content">
+                        <div class="recipe-name">${recipe.name}</div>
+                        <div class="recipe-description">${recipe.desc}</div>
+                        <div class="recipe-meta">
+                            <span>Authentic</span>
+                            <span>Regional</span>
+                        </div>
+                    </div>
+                `;
+                recipesList.appendChild(card);
+            });
+        }
+
+        function closePanel() {
+            document.getElementById('sidePanel').classList.remove('active');
+            document.getElementById('backOverlay').classList.remove('active');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderCountries(e.target.value);
+        });
+
+        renderCountries();
+    </script>
 </body>
 </html>
